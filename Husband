@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workout Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Custom styles */
+        body {
+            font-family: 'Inter', sans-serif; /* Use Inter font */
+            background-color: #f3f4f6; /* Light gray background */
+        }
+        /* Style checkboxes */
+        .form-checkbox:checked {
+            background-color: #2563eb; /* Blue when checked */
+            border-color: #2563eb;
+        }
+        /* Style timer button */
+        .timer-button {
+            transition: background-color 0.3s ease;
+        }
+        /* Style for completed sets */
+        .set-checkbox:checked + label {
+            text-decoration: line-through;
+            color: #9ca3af; /* Gray out completed sets */
+        }
+        /* Ensure cards have consistent height in grid if needed */
+        /* .workout-day-card { display: flex; flex-direction: column; } */
+        /* .workout-day-card > div { flex-grow: 1; } */
+
+        /* Style for the timer display */
+        .timer-display {
+            font-family: 'monospace'; /* Monospace font for timer */
+            min-width: 50px; /* Ensure space for MM:SS */
+            display: inline-block;
+            text-align: right;
+        }
+
+        /* Add some spacing between sets */
+        .set-item {
+            margin-bottom: 0.5rem; /* Add space below each set */
+        }
+
+        /* Responsive adjustments for smaller screens */
+        @media (max-width: 640px) {
+            .exercise-details {
+                flex-direction: column; /* Stack exercise name and reps vertically */
+                align-items: flex-start; /* Align text to the start */
+            }
+            .timer-controls {
+                margin-top: 0.5rem; /* Add space above timer controls */
+                width: 100%; /* Make timer controls take full width */
+                justify-content: space-between; /* Space out checkbox/label and timer */
+            }
+            /* Adjust padding on smaller screens */
+            body {
+                padding: 1rem; /* Reduce padding */
+            }
+            h1 {
+                font-size: 1.875rem; /* Slightly smaller H1 */
+                margin-bottom: 1.5rem;
+            }
+            /* Ensure grid columns work well on small screens (already handled by default Tailwind grid) */
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-4 md:p-8">
+
+    <div class="container mx-auto max-w-7xl">
+        <h1 class="text-3xl md:text-4xl font-bold text-center text-gray-800 mb-8">Workout Plan Tracker</h1>
+
+        <div id="timer-section" class="fixed bottom-4 right-4 bg-white p-4 rounded-lg shadow-lg border border-gray-200 z-50 hidden">
+            <h3 class="text-lg font-semibold mb-2">Rest Timer</h3>
+            <div id="timer-clock" class="text-4xl font-mono font-bold text-blue-600 mb-2 text-center">00:00</div>
+            <div id="timer-exercise" class="text-sm text-gray-600 mb-3 text-center"></div>
+            <button id="stop-timer-btn" class="w-full bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded timer-button">
+                Stop Timer
+            </button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+            <div class="bg-white rounded-lg shadow-md p-6 workout-day-card">
+                <h2 class="text-xl font-semibold text-gray-700 mb-1">Day 1: Chest + Shoulders (Push)</h2>
+                <p class="text-sm text-gray-500 mb-4">Focus: Compound lifts paired with isolation supersets. (~65 mins)</p>
+                <div class="space-y-4">
+                    <div class="exercise-item border-t pt-4">
+                        <div class="flex justify-between items-center exercise-details">
+                            <span class="font-medium text-gray-800">Incline Dumbbell Press</span>
+                            <span class="text-sm text-gray-600">3x8-12</span>
+                        </div>
+                        <div class="mt-2 space-y-1">
+                            <div class="set-item flex items-center justify-between">
+                                <div>
+                                    <input type="checkbox" id="d1e1s1" class="form-checkbox h-4 w-4 text-blue-600 rounded mr-2 set-checkbox"><label for="d1e1s1" class="text-sm">Set 1</label>
+                                </div>
+                                <div class="timer-controls flex items-center space-x-2">
+                                    <span class="timer-display text-sm text-gray-500"></span>
+                                    <button onclick="startTimer(90, 'Incline DB Press', this)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs timer-button">90s Rest</button>
+                                </div>
+                            </div>
+                            <div class="set-item flex items-center justify-between">
+                                <div>
+                                    <input type="checkbox" id="d1e1s2" class="form-checkbox h-4 w-4 text-blue-600 rounded mr-2 set-checkbox"><label for="d1e1s2" class="text-sm">Set 2</label>
+                                </div>
+                                <div class="timer-controls flex items-center space-x-2">
+                                    <span class="timer-display text-sm text-gray-500"></span>
+                                    <button onclick="startTimer(90, 'Incline DB Press', this)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs timer-button">90s Rest</button>
+                                </div>
+                            </div>
+                            <div class="set-item flex items-center justify-between">
+                                <div>
+                                    <input type="checkbox" id="d1e1s3" class="form-checkbox h-4 w-4 text-blue-600 rounded mr-2 set-checkbox"><label for="d1e1s3" class="text-sm">Set 3</label>
+                                </div>
+                                <div class="timer-controls flex items-center space-x-2">
+                                    <span class="timer-display text-sm text-gray-500"></span>
+                                    <button onclick="startTimer(90, 'Incline DB Press', this)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs timer-button">90s Rest</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="border-t pt-4">
+                         <p class="text-sm font-semibold text-indigo-600 mb-2">Superset (60s rest after pair):</p>
+                         <div class="exercise-item mb-3">
+                            <div class="flex justify-between items-center exercise-details">
+                                <span class="font-medium text-gray-800">Machine Pec Fly</span>
+                                <span class="text-sm text-gray-600">3x10-12</span>
+                            </div>
+                            <div class="mt-2 space-y-1">
+                                <div class="set-item"><input type="checkbox" id="d1e2s1" class="form-checkbox h-4 w-4 text-blue-600 rounded mr-2 set-checkbox"><label for="d1e2s1" class="text-sm">Set 1</label></div>
+                                <div class="set-item"><input type="checkbox" id="d1e2s2" class="form-checkbox h-4 w-4 text-blue-600 rounded mr-2 set-checkbox"><label for="d1e2s2" class="text-sm">Set 2</label></div>
+                                <div class="set-item"><input type="checkbox" id="d1e2s3" class="form-checkbox h-4 w-4 text-blue-600 rounded mr-2 set-checkbox"><label for="d1e2s3" class="text-sm">Set 3</label></div>
+                            </div>
+                         </div>
+                         <div class="exercise-item">
+                            <div class="flex justify-between items-center exercise-details">
+                                <span class="font-medium text-gray-800">Dumbbell Lateral Raises</span>
+                                <span class="text-sm text-gray-600">3x12-15</span>
+                            </div>
+                             <div class="mt-2 space-y-1">
+                                <div class="set-item flex items-center justify-between">
+                                    <div><input type="checkbox" id="d1e3s1" class="form-checkbox h-4 w-4 text-blue-600 rounded mr-2 set-checkbox"><label for="d1e3s1" class="text-sm">Set 1</label></div>
+                                    <div class="timer-controls flex items-center space-x-2"><span class="timer-display text-sm text-gray-500"></span><button onclick="startTimer(60, 'Superset 1', this)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs timer-button">60s Rest</button></div>
+                                </div>
+                                <div class="set-item flex items-center justify-between">
+                                    <div><input type="checkbox" id="d1e3s2" class="form-checkbox h-4 w-4 text-blue-600 rounded mr-2 set-checkbox"><label for="d1e3s2" class="text-sm">Set 2</label></div>
+                                    <div class="timer-controls flex items-center space-x-2"><span class="timer-display text-sm text-gray-500"></span><button onclick="startTimer(60, 'Superset 1', this)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs timer-button">60s Rest</button></div>
+                                </div>
+                                <div class="set-item flex items-center justify-between">
+                                    <div><input type="checkbox" id="d1e3s3" class="form-checkbox h-4 w-4 text-blue-600 rounded mr-2 set-checkbox"><label for="d1e3s3" class="text-sm">Set 3</label></div>
+                                    <div class="timer-controls flex items-center space-x-2"><span class="timer-display text-sm text-gray-500"></span><button onclick="startTimer(60, 'Superset 1', this)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs timer-button">60s Rest</button></div>
+                                </div>
+                            </div>
+                         </div>
+                    </div>
+                     <div class="border-t pt-4">
+                         <p class="text-sm font-semibold text-indigo-600 mb-2">Superset (60s rest after pair):</p>
+                         <div class="exercise-item mb-3">
+                            <div class="flex justify-between items-center exercise-details">
+                                <span class="font-medium text-gray-800">Cable Lateral Raises</span>
+                                <span class="text-sm text-gray-600">3x12-15</span>
+                            </div>
+                             <div class="mt-2 space-y-1">
+                                <div class="set-item"><input type="checkbox" id="d1e4s1" class="form-checkbox h-4 w-4 text-blue-600 rounded mr-2 set-checkbox"><label for="d1e4s1" class="text-sm">Set 1</label></div>
+                                <div class="set-item"><input type="checkbox" id="d1e4s2" class="form-checkbox h-4 w-4 text-blue-600 rounded mr-2 set-checkbox"><label for="d1e4s2" class="text-sm">Set 2</label></div>
+                                <div class="set-item"><input type="checkbox" id="d1e4s3" class="form-checkbox h-4 w-4 text-blue-600 rounded mr-2 set-checkbox"><label for="d1e4s3" class="text-sm">Set 3</label></div>
+                            </div>
+                         </div>
+                         <div class="exercise-item">
+                            <div class="flex justify-between items-center exercise-details">
+                                <span class="font-medium text-gray-800">Cable Pec Fly</span>
+                                <span class="text-sm text-gray-600">3x10-12</span>
+                            </div>
+                             <div class="mt-2 space-y-1">
+                                <div class="set-item flex items-center justify-between">
+                                    <div><input type="checkbox" id="d1e5s1" class="form-checkbox h-4 w-4 text-blue-600 rounded mr-2 set-checkbox"><label for="d1e5s1" class="text-sm">Set 1</label></div>
+                                    <div class="timer-controls flex items-center space-x-2"><span class="timer-display text-sm text-gray-500"></span><button onclick="startTimer(60, 'Superset 2', this)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs timer-button">60s Rest</button></div>
+                                </div>
+                                <div class="set-item flex items-center justify-between">
+                                    <div><input type="checkbox" id="d1e5s2" class="form-checkbox h-4 w-4 text-blue-600 rounded mr-2 set-checkbox"><label for="d1e5s2" class="text-sm">Set 2</label></div>
+                                    <div class="timer-controls flex items-center space-x-2"><span class="timer-display text-sm text-gray-500"></span><button onclick="startTimer(60, 'Superset 2', this)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs timer-button">60s Rest</button></div>
+                                </div>
+                                <div class="set-item flex items-center justify-between">
+                                    <div><input type="checkbox" id="d1e5s3" class="form-checkbox h-4 w-4 text-blue-600 rounded mr-2 set-checkbox"><label for="d1e5s3" class="text-sm">Set 3</label></div>
+                                    <div class="timer-controls flex items-center space-x-2"><span class="timer-display text-sm text-gray-500"></span><button onclick="startTimer(60, 'Superset 2', this)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs timer-button">60s Rest</button></div>
+                                </div>
+                            </div>
+                         </div>
+                    </div>
+                    <div class="exercise-item border-t pt-4">
+                        <div class="flex justify-between items-center exercise-details">
+                            <span class="font-medium text-gray-800">Tricep Pushdown</span>
+                            <span class="text-sm text-gray-600">3x12-15</span>
+                        </div>
+                        <div class="mt-2 space-y-1">
+                            <div class="set-item flex items-center justify-between">
+                                <div><input type="checkbox" id="d1e6s1" class="form-checkbox h-4 w-4 text-blue-600 rounded mr-2 set-checkbox"><label for="d1e6s1" class="text-sm">Set 1</label></div>
+                                <div class="timer-controls flex items-center space-x-2"><span class="timer-display text-sm text-gray-500"></span><button onclick="startTimer(60, 'Tricep Pushdown', this)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs timer-button">60s Rest</button></div>
+                            </div>
+                            <div class="set-item flex items-center justify-between">
+                                <div><input type="checkbox" id="d1e6s2" class="form-checkbox h-4 w-4 text-blue-600 rounded mr-2 set-checkbox"><label for="d1e6s2" class="text-sm">Set 2</label></div>
+                                <div class="timer-controls flex items-center space-x-2"><span class="timer-display text-sm text-gray-500"></span><button onclick="startTimer(60, 'Tricep Pushdown', this)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs timer-button">60s Rest</button></div>
+                            </div>
+                            <div class="set-item flex items-center justify-between">
+                                <div><input type="checkbox" id="d1e6s3" class="form-checkbox h-4 w-4 text-blue-600 rounded mr-2 set-checkbox"><label for="d1e6s3" class="text-sm">Set 3</label></div>
+                                <div class="timer-controls flex items-center space-x-2"><span class="timer-display text-sm text-gray-500"></span><button onclick="startTimer(60, 'Tricep Pushdown', this)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs timer-button">60s Rest</button></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-md p-6 workout-day-card">
+                <h2 class="text-xl font-semibold text-gray-700 mb-1">Day 2: Legs (Quads + Calves)</h2>
+                <p class="text-sm text-gray-500 mb-4">Time Saver: Use 90-second rest between compound lifts. (~70 mins)</p>
+                <div class="space-y-4">
+                    <div class="exercise-item border-t pt-4">
+                        <div class="flex justify-between items-center exercise-details">
+                            <span class="font-medium text-gray-800">Machine Hack Squat</span>
+                            <span class="text-sm text-gray-600">3x8-10</span>
+                        </div>
+                        <div class="mt-2 space-y-1">
+                            <div class="set-item flex items-center justify-between"><div><input type="checkbox" id="d2e1s1" class="form-checkbox h-4 w-4 text-blue-600 rounded mr-2 set-checkbox"><label for="d2e1s1" class="text-sm">Set 1</label></div><div class="timer-controls flex items-center space-x-2"><span class="timer-display text-sm text-gray-500"></span><button onclick="startTimer(90, 'Hack Squat', this)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs timer-button">90s Rest</button></div></div>
+                            <div class="set-item flex items-center justify-between"><div><input type="checkbox" id="d2e1s2" class="form-checkbox h-4 w-4 text-blue-600 rounded mr-2 set-checkbox"><label for="d2e1s2" class="text-sm">Set 2</label></div><div class="timer-controls flex items-center space-x-2"><span class="timer-display text-sm text-gray-500"></span><button onclick="startTimer(90, 'Hack Squat', this)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs timer-button">90s Rest</button></div></div>
+                            <div class="set-item flex items-center justify-between"><div><input type="checkbox" id="d2e1s3" class="form-checkbox h-4 w-4 text-blue-600 rounded mr-2 set-checkbox"><label for="d2e1s3" class="text-sm">Set 3</label></div><div class="timer-controls flex items-center space-x-2"><span class="timer-display text-sm text-gray-500"></span><button onclick="startTimer(90, 'Hack Squat', this)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs timer-button">90s Rest</button></div></div>
+                        </div>
+                    </div>
+                    <div class="exercise-item border-t pt-4">
+                        <div class="flex justify-between items-center exercise-details">
+                            <span class="font-medium text-gray-800">Leg Press Machine</span>
+                            <span class="text-sm text-gray-600">3x12-15</span>
+                        </div>
+                         <div class="mt-2 space-y-1">
+                            <div class="set-item flex items-center justify-between"><div><input type="checkbox" id="d2e2s1" class="form-checkbox h-4 w-4 text-blue-600 rounded mr-2 set-checkbox"><label for="d2e2s1" class="text-sm">Set 1</label></div><div class="timer-controls flex items-center space-x-2"><span class="timer-display text-sm text-gray-500"></span><button onclick="startTimer(90, 'Leg Press', this)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs timer-button">90s Rest</button></div></div>
+                            <div class="set-item flex items-center justify-between"><div><input type="checkbox" id="d2e2s2" class="form-checkbox h-4 w-4 text-blue-600 rounded mr-2 set-checkbox"><label for="d2e2s2" class="text-sm">Set 2</label></div><div class="timer-controls flex items-center space-x-2"><span class="timer-display text-sm text-gray-500"></span><button onclick="startTimer(90, 'Leg Press', this)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs timer-button">90s Rest</button></div></div>
+                            <div class="set-item flex items-center justify-between"><div><input type="checkbox" id="d2e2s3" class="form-checkbox h-4 w-4 text-blue-600 rounded mr-2 set-checkbox"><label for="d2e2s3" class="text-sm">Set 3</label></div><div class="timer-controls flex items-center space-x-2"><span class="timer-display text-sm text-gray-500"></span><button onclick="startTimer(90, 'Leg Press', this)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs timer-button">90s Rest</button></div></div>
+                        </div>
+                    </div>
+                    <div class="exercise-item border-t pt-4">
+                        <div class="flex justify-between items-center exercise-details">
+                            <span class="font-medium text-gray-800">Leg Extension Machine</span>
+                            <span class="text-sm text-gray-600">3x12-15</span>
+                        </div>
+                         <div class="mt-2 space-y-1">
+                            <div class="set-item flex items-center justify-between"><div><input type="checkbox" id="d2e3s1" class="form-checkbox h-4 w-4 text-blue-600 rounded mr-2 set-checkbox"><label for="d2e3s1" class="text-sm">Set 1</label></div><div class="timer-controls flex items-center space-x-2"><span class="timer-display text-sm text-gray-500"></span><button onclick="startTimer(60, 'Leg Extension', this)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs timer-button">60s Rest</button></div></div>
+                            <div class="set-item flex items-center justify-between"><div><input type="checkbox" id="d2e3s2" class="form-checkbox h-4 w-4 text-blue-600 rounded mr-2 set-checkbox"><label for="d2e3s2" class="text-sm">Set 2</label></div><div class="timer-controls flex items-center space-x-2"><span class="timer-display text-sm text-gray-500"></span><button onclick="startTimer(60, 'Leg Extension', this)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs timer-button">60s Rest</button></div></div>
+                            <div class="set-item flex items-center justify-between"><div><input type="checkbox" id="d2e3s3" class="form-checkbox h-4 w-4 text-blue-600 rounded mr-2 set-checkbox"><label for="d2e3s3" class="text-sm">Set 3</label></div><div class="timer-controls flex items-center space-x-2"><span class="timer-display text-sm text-gray-500"></span><button onclick="startTimer(60, 'Leg Extension', this)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs timer-button">60s Rest</button></div></div>
+                        </div>
+                    </div>
+                     <div class="exercise-item border-t pt-4">
+                        <div class="flex justify-between items-center exercise-details">
+                            <span class="font-medium text-gray-800">Standing Calf Raises</span>
+                            <span class="text-sm text-gray-600">4x20-25</span>
+                        </div>
+                         <div class="mt-2 space-y-1">
+                            <div class="set-item flex items-center justify-between"><div><input type="checkbox" id="d2e4s1" class="form-checkbox h-4 w-4 text-blue-600 rounded mr-2 set-checkbox"><label for="d2e4s1" class="text-sm">Set 1</label></div><div class="timer-controls flex items-center space-x-2"><span class="timer-display text-sm text-gray-500"></span><button onclick="startTimer(60, 'Calf Raises', this)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs timer-button">60s Rest</button></div></div>
+                            <div class="set-item flex items-center justify-between"><div><input type="checkbox" id="d2e4s2" class="form-checkbox h-4 w-4 text-blue-600 rounded mr-2 set-checkbox"><label for="d2e4s2" class="text-sm">Set 2</label></div><div class="timer-controls flex items-center space-x-2"><span class="timer-display text-sm text-gray-500"></span><button onclick="startTimer(60, 'Calf Raises', this)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs timer-button">60s Rest</button></div></div>
+                            <div class="set-item flex items-center justify-between"><div><input type="checkbox" id="d2e4s3" class="form-checkbox h-4 w-4 text-blue-600 rounded mr-2 set-checkbox"><label for="d2e4s3" class="text-sm">Set 3</label></div><div class="timer-controls flex items-center space-x-2"><span class="timer-display text-sm text-gray-500"></span><button onclick="startTimer(60, 'Calf Raises', this)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs timer-button">60s Rest</button></div></div>
+                             <div class="set-item flex items-center justify-between"><div><input type="checkbox" id="d2e4s4" class="form-checkbox h-4 w-4 text-blue-600 rounded mr-2 set-checkbox"><label for="d2e4s4" class="text-sm">Set 4</label></div><div class="timer-controls flex items-center space-x-2"><span class="timer-display text-sm text-gray-500"></span><button onclick="startTimer(60, 'Calf Raises', this)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs timer-button">60s Rest</button></div></div>
+                        </div>
+                    </div>
+                     <div class="exercise-item border-t pt-4">
+                        <div class="flex justify-between items-center exercise-details">
+                            <span class="font-medium text-gray-800">Cable Crunches (Abs)</span>
+                            <span class="text-sm text-gray-600">3x15-20</span>
+                        </div>
+                         <div class="mt-2 space-y-1">
+                            <div class="set-item flex items-center justify-between"><div><input type="checkbox" id="d2e5s1" class="form-checkbox h-4 w-4 text-blue-600 rounded mr-2 set-checkbox"><label for="d2e5s1" class="text-sm">Set 1</label></div><div class="timer-controls flex items-center space-x-2"><span class="timer-display text-sm text-gray-500"></span><button onclick="startTimer(60, 'Cable Crunches', this)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs timer-button">60s Rest</button></div></div>
+                            <div class="set-item flex items-center justify-between"><div><input type="checkbox" id="d2e5s2" class="form-checkbox h-4 w-4 text-blue-600 rounded mr-2 set-checkbox"><label for="d2e5s2" class="text-sm">Set 2</label></div><div class="timer-controls flex items-center space-x-2"><span class="timer-display text-sm text-gray-500"></span><button onclick="startTimer(60, 'Cable Crunches', this)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs timer-button">60s Rest</button></div></div>
+                            <div class="set-item flex items-center justify-between"><div><input type="checkbox" id="d2e5s3" class="form-checkbox h-4 w-4 text-blue-600 rounded mr-2 set-checkbox"><label for="d2e5s3" class="text-sm">Set 3</label></div><div class="timer-controls flex items-center space-x-2"><span class="timer-display text-sm text-gray-500"></span><button onclick="startTimer(60, 'Cable Crunches', this)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs timer-button">60s Rest</button></div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-md p-6 workout-day-card">
+                 <h2 class="text-xl font-semibold text-gray-700 mb-1">Day 3: Back + Triceps (Pull)</h2>
+                 <p class="text-sm text-gray-500 mb-4">Time Saver: Pair rows with triceps exercises. (~60 mins)</p>
+                 <div class="space-y-4">
+                     <div class="exercise-item border-t pt-4">
+                        <div class="flex justify-between items-center exercise-details">
+                            <span class="font-medium text-gray-800">Machine Pulldown</span>
+                            <span class="text-sm text-gray-600">3x8-10</span>
+                        </div>
+                        <div class="mt-2 space-y-1">
+                            <div class="set-item flex items-center justify-between"><div><input type="checkbox" id="d3e1s1" class="form-checkbox h-4 w-4 text-blue-600 rounded mr-2 set-checkbox"><label for="d3e1s1" class="text-sm">Set 1</label></div><div class="timer-controls flex items-center space-x-2"><span class="timer-display text-sm text-gray-500"></span><button onclick="startTimer(90, 'Machine Pulldown', this)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs timer-button">90s Rest</button></div></div>
+                            <div class="set-item flex items-center justify-between"><div><input type="checkbox" id="d3e1s2" class="form-checkbox h-4 w-4 text-blue-600 rounded mr-2 set-checkbox"><label for="d3e1s2" class="text-sm">Set 2</label></div><div class="timer-controls flex items-center space-x-2"><span class="timer-display text-sm text-gray-500"></span><button onclick="startTimer(90, 'Machine Pulldown', this)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs timer-button">90s Rest</button></div></div>
+                            <div class="set-item flex items-center justify-between"><div><input type="checkbox" id="d3e1s3" class="form-checkbox h-4 w-4 text-blue-600 rounded mr-2 set-checkbox"><label for="d3e1s3" class="text-sm">Set 3</label></div><div class="timer-controls flex items-center space-x-2"><span class="timer-display text-sm text-gray-500"></span><button onclick="startTimer(90, 'Machine Pulldown', this)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs timer-button">90s Rest</button></div></div>
+                        </div>
+                    </div>
+                     <div class="exercise-item border-t pt-4">
+                        <div class="flex justify-between items-center exercise-details">
+                            <span class="font-medium text-gray-800">Single-Arm Cable Row</span>
+                            <span class="text-sm text-gray-600">3x8-10</span>
+                        </div>
+                        <div class="mt-2 space-y-1">
+                            <div class="set-item flex items-center justify-between"><div><input type="checkbox" id="d3e2s1" class="form-checkbox h-4 w-4 text-blue-600 rounded mr-2 set-checkbox"><label for="d3e2s1" class="text-sm">Set 1</label></div><div class="timer-controls flex items-center space-x-2"><span class="timer-display text-sm text-gray-500"></span><button onclick="startTimer(90, 'SA Cable Row', this)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs timer-button">90s Rest</button></div></div>
+                            <div class="set-item flex items-center justify-between"><div><input type="checkbox" id="d3e2s2" class="form-checkbox h-4 w-4 text-blue-600 rounded mr-2 set-checkbox"><label for="d3e2s2" class="text-sm">Set 2</label></div><div class="timer-controls flex items-center space-x-2"><span class="timer-display text-sm text-gray-500"></span><button onclick="startTimer(90, 'SA Cable Row', this)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs timer-button">90s Rest</button></div></div>
+                            <div class="set-item flex items-center justify-between"><div><input type="checkbox" id="d3e2s3" class="form-checkbox h-4 w-4 text-blue-600 rounded mr-2 set-checkbox"><label for="d3e2s3" class="text-sm">Set 3</label></div><div class="timer-controls flex items-center space-x-2"><span class="timer-display text-sm text-gray-500"></span><button onclick="startTimer(90, 'SA Cable Row', this)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs timer-button">90s Rest</button></div></div>
+                        </div>
+                    </div>
+                     <div class="exercise-item border-t pt-4">
+                        <div class="flex justify-between items-center exercise-details">
+                            <span class="font-medium text-gray-800">Cable Rope Overhead Extension</span>
+                            <span class="text-sm text-gray-600">3x10-12</span>
+                        </div>
+                        <div class="mt-2 space-y-1">
+                            <div class="set-item flex items-center justify-between"><div><input type="checkbox" id="d3e3s1" class="form-checkbox h-4 w-4 text-blue-600 rounded mr-2 set-checkbox"><label for="d3e3s1" class="text-sm">Set 1</label></div><div class="timer-controls flex items-center space-x-2"><span class="timer-display text-sm text-gray-500"></span><button onclick="startTimer(60, 'Overhead Ext', this)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs timer-button">60s Rest</button></div></div>
+                            <div class="set-item flex items-center justify-between"><div><input type="checkbox" id="d3e3s2" class="form-checkbox h-4 w-4 text-blue-600 rounded mr-2 set-checkbox"><label for="d3e3s2" class="text-sm">Set 2</label></div><div class="timer-controls flex items-center space-x-2"><span class="timer-display text-sm text-gray-500"></span><button onclick="startTimer(60, 'Overhead Ext', this)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs timer-button">60s Rest</button></div></div>
+                            <div class="set-item flex items-center justify-between"><div><input type="checkbox" id="d3e3s3" class="form-checkbox h-4 w-4 text-blue-600 rounded mr-2 set-checkbox"><label for="d3e3s3" class="text-sm">Set 3</label></div><div class="timer-controls flex items-center space-x-2"><span class="timer-display text-sm text-gray-500"></span><button onclick="startTimer(60, 'Overhead Ext', this)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs timer-button">60s Rest</button></div></div>
+                        </div>
+                    </div>
+                     <div class="exercise-item border-t pt-4">
+                        <div class="flex justify-between items-center exercise-details">
+                            <span class="font-medium text-gray-800">Cable Rear Delt Fly</span>
+                            <span class="text-sm text-gray-600">3x12-15</span>
+                        </div>
+                        <div class="mt-2 space-y-1">
+                            <div class="set-item flex items-center justify-between"><div><input type="checkbox" id="d3e4s1" class="form-checkbox h-4 w-4 text-blue-600 rounded mr-2 set-checkbox"><label for="d3e4s1" class="text-sm">Set 1</label></div><div class="timer-controls flex items-center space-x-2"><span class="timer-display text-sm text-gray-500"></span><button onclick="startTimer(60, 'Rear Delt Fly', this)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs timer-button">60s Rest</button></div></div>
+                            <div class="set-item flex items-center justify-between"><div><input type="checkbox" id="d3e4s2" class="form-checkbox h-4 w-4 text-blue-600 rounded mr-2 set-checkbox"><label for="d3e4s2" class="text-sm">Set 2</label></div><div class="timer-controls flex items-center space-x-2"><span class="timer-display text-sm text-gray-500"></span><button onclick="startTimer(60, 'Rear Delt Fly', this)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs timer-button">60s Rest</button></div></div>
+                            <div class="set-item flex items-center justify-between"><div><input type="checkbox" id="d3e4s3" class="form-checkbox h-4 w-4 text-blue-600 rounded mr-2 set-checkbox"><label for="d3e4s3" class="text-sm">Set 3</label></div><div class="timer-controls flex items-center space-x-2"><span class="timer-display text-sm text-gray-500"></span><button onclick="startTimer(60, 'Rear Delt Fly', this)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs timer-button">60s Rest</button></div></div>
+                        </div>
+                    </div>
+                    <div class="exercise-item border-t pt-4">
+                        <div class="flex justify-between items-center exercise-details">
+                            <span class="font-medium text-gray-800">Machine Dips</span>
+                            <span class="text-sm text-gray-600">3x8-12</span>
+                        </div>
+                        <div class="mt-2 space-y-1">
+                            <div class="set-item flex items-center justify-between"><div><input type="checkbox" id="d3e5s1" class="form-checkbox h-4 w-4 text-blue-600 rounded mr-2 set-checkbox"><label for="d3e5s1" class="text-sm">Set 1</label></div><div class="timer-controls flex items-center space-x-2"><span class="timer-display text-sm text-gray-500"></span><button onclick="startTimer(60, 'Machine Dips', this)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs timer-button">60s Rest</button></div></div>
+                            <div class="set-item flex items-center justify-between"><div><input type="checkbox" id="d3e5s2" class="form-checkbox h-4 w-4 text-blue-600 rounded mr-2 set-checkbox"><label for="d3e5s2" class="text-sm">Set 2</label></div><div class="timer-controls flex items-center space-x-2"><span class="timer-display text-sm text-gray-500"></span><button onclick="startTimer(60, 'Machine Dips', this)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs timer-button">60s Rest</button></div></div>
+                            <div class="set-item flex items-center justify-between"><div><input type="checkbox" id="d3e5s3" class="form-checkbox h-4 w-4 text-blue-600 rounded mr-2 set-checkbox"><label for="d3e5s3" class="text-sm">Set 3</label></div><div class="timer-controls flex items-center space-x-2"><span class="timer-display text-sm text-gray-500"></span><button onclick="startTimer(60, 'Machine Dips', this)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs timer-button">60s Rest</button></div></div>
+                        </div>
+                    </div>
+                 </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-md p-6 workout-day-card">
+                <h2 class="text-xl font-semibold text-gray-700 mb-1">Day 4: Rest / Active Recovery</h2>
+                <p class="text-sm text-gray-500 mb-4">Focus: Recovery</p>
+                 <div class="space-y-4 border-t pt-4">
+                    <p class="text-gray-800">Light cardio (20-30 min walk) or mobility work.</p>
+                    <p class="text-gray-600 text-sm">Listen to your body and allow it to recover.</p>
+                 </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-md p-6 workout-day-card">
+                 <h2 class="text-xl font-semibold text-gray-700 mb-1">Day 5: Chest + Shoulders (Push V2)</h2>
+                 <p class="text-sm text-gray-500 mb-4">Time Saver: Alternate pressing and pulling movements. (~65 mins)</p>
+                 <div class="space-y-4">
+                     <div class="exercise-item border-t pt-4">
+                        <div class="flex justify-between items-center exercise-details">
+                            <span class="font-medium text-gray-800">Chest Press Machine</span>
+                            <span class="text-sm text-gray-600">3x8-12</span>
+                        </div>
+                        <div class="mt-2 space-y-1">
+                            <div class="set-item flex items-center justify-between"><div><input type="checkbox" id="d5e1s1" class="form-checkbox h-4 w-4 text-blue-600 rounded mr-2 set-checkbox"><label for="d5e1s1" class="text-sm">Set 1</label></div><div class="timer-controls flex items-center space-x-2"><span class="timer-display text-sm text-gray-500"></span><button onclick="startTimer(90, 'Chest Press', this)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs timer-button">90s Rest</button></div></div>
+                            <div class="set-item flex items-center justify-between"><div><input type="checkbox" id="d5e1s2" class="form-checkbox h-4 w-4 text-blue-600 rounded mr-2 set-checkbox"><label for="d5e1s2" class="text-sm">Set 2</label></div><div class="timer-controls flex items-center space-x-2"><span class="timer-display text-sm text-gray-500"></span><button onclick="startTimer(90, 'Chest Press', this)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs timer-button">90s Rest</button></div></div>
+                            <div class="set-item flex items-center justify-between"><div><input type="checkbox" id="d5e1s3" class="form-checkbox h-4 w-4 text-blue-600 rounded mr-2 set-checkbox"><label for="d5e1s3" class="text-sm">Set 3</label></div><div class="timer-controls flex items-center space-x-2"><span class="timer-display text-sm text-gray-500"></span><button onclick="startTimer(90, 'Chest Press', this)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs timer-button">90s Rest</button></div></div>
+                        </div>
+                    </div>
+                    <div class="border-t pt-4">
+                         <p class="text-sm font-semibold text-indigo-600 mb-2">Superset (60s rest after pair):</p>
+                         <div class="exercise-item mb-3">
+                            <div class="flex justify-between items-center exercise-details">
+                                <span class="font-medium text-gray-800">Incline Dumbbell Curl (Biceps)</span>
+                                <span class="text-sm text-gray-600">3x8-10</span>
+                            </div>
+                            <div class="mt-2 space-y-1">
+                                <div class="set-item"><input type="checkbox" id="d5e2s1" class="form-checkbox h-4 w-4 text-blue-600 rounded mr-2 set-checkbox"><label for="d5e2s1" class="text-sm">Set 1</label></div>
+                                <div class="set-item"><input type="checkbox" id="d5e2s2" class="form-checkbox h-4 w-4 text-blue-600 rounded mr-2 set-checkbox"><label for="d5e2s2" class="text-sm">Set 2</label></div>
+                                <div class="set-item"><input type="checkbox" id="d5e2s3" class="form-checkbox h-4 w-4 text-blue-600 rounded mr-2 set-checkbox"><label for="d5e2s3" class="text-sm">Set 3</label></div>
+                            </div>
+                         </div>
+                         <div class="exercise-item">
+                            <div class="flex justify-between items-center exercise-details">
+                                <span class="font-medium text-gray-800">Dumbbell Lateral Raises</span>
+                                <span class="text-sm text-gray-600">3x12-15</span>
+                            </div>
+                             <div class="mt-2 space-y-1">
+                                <div class="set-item flex items-center justify-between">
+                                    <div><input type="checkbox" id="d5e3s1" class="form-checkbox h-4 w-4 text-blue-600 rounded mr-2 set-checkbox"><label for="d5e3s1" class="text-sm">Set 1</label></div>
+                                    <div class="timer-controls flex items-center space-x-2"><span class="timer-display text-sm text-gray-500"></span><button onclick="startTimer(60, 'Superset 3', this)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs timer-button">60s Rest</button></div>
+                                </div>
+                                <div class="set-item flex items-center justify-between">
+                                    <div><input type="checkbox" id="d5e3s2" class="form-checkbox h-4 w-4 text-blue-600 rounded mr-2 set-checkbox"><label for="d5e3s2" class="text-sm">Set 2</label></div>
+                                    <div class="timer-controls flex items-center space-x-2"><span class="timer-display text-sm text-gray-500"></span><button onclick="startTimer(60, 'Superset 3', this)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs timer-button">60s Rest</button></div>
+                                </div>
+                                <div class="set-item flex items-center justify-between">
+                                    <div><input type="checkbox" id="d5e3s3" class="form-checkbox h-4 w-4 text-blue-600 rounded mr-2 set-checkbox"><label for="d5e3s3" class="text-sm">Set 3</label></div>
+                                    <div class="timer-controls flex items-center space-x-2"><span class="timer-display text-sm text-gray-500"></span><button onclick="startTimer(60, 'Superset 3', this)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs timer-button">60s Rest</button></div>
+                                </div>
+                            </div>
+                         </div>
+                    </div>
+                     <div class="exercise-item border-t pt-4">
+                        <div class="flex justify-between items-center exercise-details">
+                            <span class="font-medium text-gray-800">Cable Bench Chest Fly</span>
+                            <span class="text-sm text-gray-600">3x10-12</span>
+                        </div>
+                        <div class="mt-2 space-y-1">
+                            <div class="set-item flex items-center justify-between"><div><input type="checkbox" id="d5e4s1" class="form-checkbox h-4 w-4 text-blue-600 rounded mr-2 set-checkbox"><label for="d5e4s1" class="text-sm">Set 1</label></div><div class="timer-controls flex items-center space-x-2"><span class="timer-display text-sm text-gray-500"></span><button onclick="startTimer(60, 'Cable Bench Fly', this)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs timer-button">60s Rest</button></div></div>
+                            <div class="set-item flex items-center justify-between"><div><input type="checkbox" id="d5e4s2" class="form-checkbox h-4 w-4 text-blue-600 rounded mr-2 set-checkbox"><label for="d5e4s2" class="text-sm">Set 2</label></div><div class="timer-controls flex items-center space-x-2"><span class="timer-display text-sm text-gray-500"></span><button onclick="startTimer(60, 'Cable Bench Fly', this)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs timer-button">60s Rest</button></div></div>
+                            <div class="set-item flex items-center justify-between"><div><input type="checkbox" id="d5e4s3" class="form-checkbox h-4 w-4 text-blue-600 rounded mr-2 set-checkbox"><label for="d5e4s3" class="text-sm">Set 3</label></div><div class="timer-controls flex items-center space-x-2"><span class="timer-display text-sm text-gray-500"></span><button onclick="startTimer(60, 'Cable Bench Fly', this)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs timer-button">60s Rest</button></div></div>
+                        </div>
+                    </div>
+                    <div class="exercise-item border-t pt-4">
+                        <div class="flex justify-between items-center exercise-details">
+                            <span class="font-medium text-gray-800">Face-Away Cable Curl (Forearms)</span>
+                            <span class="text-sm text-gray-600">3x10-12</span>
+                        </div>
+                        <div class="mt-2 space-y-1">
+                            <div class="set-item flex items-center justify-between"><div><input type="checkbox" id="d5e5s1" class="form-checkbox h-4 w-4 text-blue-600 rounded mr-2 set-checkbox"><label for="d5e5s1" class="text-sm">Set 1</label></div><div class="timer-controls flex items-center space-x-2"><span class="timer-display text-sm text-gray-500"></span><button onclick="startTimer(60, 'Face-Away Curl', this)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs timer-button">60s Rest</button></div></div>
+                            <div class="set-item flex items-center justify-between"><div><input type="checkbox" id="d5e5s2" class="form-checkbox h-4 w-4 text-blue-600 rounded mr-2 set-checkbox"><label for="d5e5s2" class="text-sm">Set 2</label></div><div class="timer-controls flex items-center space-x-2"><span class="timer-display text-sm text-gray-500"></span><button onclick="startTimer(60, 'Face-Away Curl', this)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs timer-button">60s Rest</button></div></div>
+                            <div class="set-item flex items-center justify-between"><div><input type="checkbox" id="d5e5s3" class="form-checkbox h-4 w-4 text-blue-600 rounded mr-2 set-checkbox"><label for="d5e5s3" class="text-sm">Set 3</label></div><div class="timer-controls flex items-center space-x-2"><span class="timer-display text-sm text-gray-500"></span><button onclick="startTimer(60, 'Face-Away Curl', this)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs timer-button">60s Rest</button></div></div>
+                        </div>
+                    </div>
+                 </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-md p-6 workout-day-card">
+                 <h2 class="text-xl font-semibold text-gray-700 mb-1">Day 6: Legs (Hamstrings + Glutes)</h2>
+                 <p class="text-sm text-gray-500 mb-4">Time Saver: Use staggered rest. (~70 mins)</p>
+                 <div class="space-y-4">
+                    <div class="exercise-item border-t pt-4">
+                        <div class="flex justify-between items-center exercise-details">
+                            <span class="font-medium text-gray-800">Romanian Deadlift (DB)</span>
+                            <span class="text-sm text-gray-600">3x8-10</span>
+                        </div>
+                        <div class="mt-2 space-y-1">
+                            <div class="set-item flex items-center justify-between"><div><input type="checkbox" id="d6e1s1" class="form-checkbox h-4 w-4 text-blue-600 rounded mr-2 set-checkbox"><label for="d6e1s1" class="text-sm">Set 1</label></div><div class="timer-controls flex items-center space-x-2"><span class="timer-display text-sm text-gray-500"></span><button onclick="startTimer(90, 'RDL (DB)', this)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs timer-button">90s Rest</button></div></div>
+                            <div class="set-item flex items-center justify-between"><div><input type="checkbox" id="d6e1s2" class="form-checkbox h-4 w-4 text-blue-600 rounded mr-2 set-checkbox"><label for="d6e1s2" class="text-sm">Set 2</label></div><div class="timer-controls flex items-center space-x-2"><span class="timer-display text-sm text-gray-500"></span><button onclick="startTimer(90, 'RDL (DB)', this)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs timer-button">90s Rest</button></div></div>
+                            <div class="set-item flex items-center justify-between"><div><input type="checkbox" id="d6e1s3" class="form-checkbox h-4 w-4 text-blue-600 rounded mr-2 set-checkbox"><label for="d6e1s3" class="text-sm">Set 3</label></div><div class="timer-controls flex items-center space-x-2"><span class="timer-display text-sm text-gray-500"></span><button onclick="startTimer(90, 'RDL (DB)', this)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs timer-button">90s Rest</button></div></div>
+                        </div>
+                    </div>
+                    <div class="exercise-item border-t pt-4">
+                        <div class="flex justify-between items-center exercise-details">
+                            <span class="font-medium text-gray-800">Leg Curl Machine</span>
+                            <span class="text-sm text-gray-600">3x10-12</span>
+                        </div>
+                         <div class="mt-2 space-y-1">
+                            <div class="set-item flex items-center justify-between"><div><input type="checkbox" id="d6e2s1" class="form-checkbox h-4 w-4 text-blue-600 rounded mr-2 set-checkbox"><label for="d6e2s1" class="text-sm">Set 1</label></div><div class="timer-controls flex items-center space-x-2"><span class="timer-display text-sm text-gray-500"></span><button onclick="startTimer(60, 'Leg Curl', this)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs timer-button">60s Rest</button></div></div>
+                            <div class="set-item flex items-center justify-between"><div><input type="checkbox" id="d6e2s2" class="form-checkbox h-4 w-4 text-blue-600 rounded mr-2 set-checkbox"><label for="d6e2s2" class="text-sm">Set 2</label></div><div class="timer-controls flex items-center space-x-2"><span class="timer-display text-sm text-gray-500"></span><button onclick="startTimer(60, 'Leg Curl', this)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs timer-button">60s Rest</button></div></div>
+                            <div class="set-item flex items-center justify-between"><div><input type="checkbox" id="d6e2s3" class="form-checkbox h-4 w-4 text-blue-600 rounded mr-2 set-checkbox"><label for="d6e2s3" class="text-sm">Set 3</label></div><div class="timer-controls flex items-center space-x-2"><span class="timer-display text-sm text-gray-500"></span><button onclick="startTimer(60, 'Leg Curl', this)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs timer-button">60s Rest</button></div></div>
+                        </div>
+                    </div>
+                    <div class="exercise-item border-t pt-4">
+                        <div class="flex justify-between items-center exercise-details">
+                            <span class="font-medium text-gray-800">Bulgarian Split Squat</span>
+                            <span class="text-sm text-gray-600">3x8-10</span>
+                        </div>
+                         <div class="mt-2 space-y-1">
+                            <div class="set-item flex items-center justify-between"><div><input type="checkbox" id="d6e3s1" class="form-checkbox h-4 w-4 text-blue-600 rounded mr-2 set-checkbox"><label for="d6e3s1" class="text-sm">Set 1</label></div><div class="timer-controls flex items-center space-x-2"><span class="timer-display text-sm text-gray-500"></span><button onclick="startTimer(90, 'Split Squat', this)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs timer-button">90s Rest</button></div></div>
+                            <div class="set-item flex items-center justify-between"><div><input type="checkbox" id="d6e3s2" class="form-checkbox h-4 w-4 text-blue-600 rounded mr-2 set-checkbox"><label for="d6e3s2" class="text-sm">Set 2</label></div><div class="timer-controls flex items-center space-x-2"><span class="timer-display text-sm text-gray-500"></span><button onclick="startTimer(90, 'Split Squat', this)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs timer-button">90s Rest</button></div></div>
+                            <div class="set-item flex items-center justify-between"><div><input type="checkbox" id="d6e3s3" class="form-checkbox h-4 w-4 text-blue-600 rounded mr-2 set-checkbox"><label for="d6e3s3" class="text-sm">Set 3</label></div><div class="timer-controls flex items-center space-x-2"><span class="timer-display text-sm text-gray-500"></span><button onclick="startTimer(90, 'Split Squat', this)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs timer-button">90s Rest</button></div></div>
+                        </div>
+                    </div>
+                     <div class="exercise-item border-t pt-4">
+                        <div class="flex justify-between items-center exercise-details">
+                            <span class="font-medium text-gray-800">Seated Calf Raise</span>
+                            <span class="text-sm text-gray-600">4x15-20</span>
+                        </div>
+                         <div class="mt-2 space-y-1">
+                            <div class="set-item flex items-center justify-between"><div><input type="checkbox" id="d6e4s1" class="form-checkbox h-4 w-4 text-blue-600 rounded mr-2 set-checkbox"><label for="d6e4s1" class="text-sm">Set 1</label></div><div class="timer-controls flex items-center space-x-2"><span class="timer-display text-sm text-gray-500"></span><button onclick="startTimer(60, 'Seated Calf Raise', this)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs timer-button">60s Rest</button></div></div>
+                            <div class="set-item flex items-center justify-between"><div><input type="checkbox" id="d6e4s2" class="form-checkbox h-4 w-4 text-blue-600 rounded mr-2 set-checkbox"><label for="d6e4s2" class="text-sm">Set 2</label></div><div class="timer-controls flex items-center space-x-2"><span class="timer-display text-sm text-gray-500"></span><button onclick="startTimer(60, 'Seated Calf Raise', this)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs timer-button">60s Rest</button></div></div>
+                            <div class="set-item flex items-center justify-between"><div><input type="checkbox" id="d6e4s3" class="form-checkbox h-4 w-4 text-blue-600 rounded mr-2 set-checkbox"><label for="d6e4s3" class="text-sm">Set 3</label></div><div class="timer-controls flex items-center space-x-2"><span class="timer-display text-sm text-gray-500"></span><button onclick="startTimer(60, 'Seated Calf Raise', this)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs timer-button">60s Rest</button></div></div>
+                             <div class="set-item flex items-center justify-between"><div><input type="checkbox" id="d6e4s4" class="form-checkbox h-4 w-4 text-blue-600 rounded mr-2 set-checkbox"><label for="d6e4s4" class="text-sm">Set 4</label></div><div class="timer-controls flex items-center space-x-2"><span class="timer-display text-sm text-gray-500"></span><button onclick="startTimer(60, 'Seated Calf Raise', this)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs timer-button">60s Rest</button></div></div>
+                        </div>
+                    </div>
+                     <div class="exercise-item border-t pt-4">
+                        <div class="flex justify-between items-center exercise-details">
+                            <span class="font-medium text-gray-800">Hanging Knee Raises (Abs)</span>
+                            <span class="text-sm text-gray-600">3xAMRAP</span>
+                        </div>
+                         <div class="mt-2 space-y-1">
+                            <div class="set-item flex items-center justify-between"><div><input type="checkbox" id="d6e5s1" class="form-checkbox h-4 w-4 text-blue-600 rounded mr-2 set-checkbox"><label for="d6e5s1" class="text-sm">Set 1</label></div><div class="timer-controls flex items-center space-x-2"><span class="timer-display text-sm text-gray-500"></span><button onclick="startTimer(60, 'Hanging Knee Raises', this)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs timer-button">60s Rest</button></div></div>
+                            <div class="set-item flex items-center justify-between"><div><input type="checkbox" id="d6e5s2" class="form-checkbox h-4 w-4 text-blue-600 rounded mr-2 set-checkbox"><label for="d6e5s2" class="text-sm">Set 2</label></div><div class="timer-controls flex items-center space-x-2"><span class="timer-display text-sm text-gray-500"></span><button onclick="startTimer(60, 'Hanging Knee Raises', this)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs timer-button">60s Rest</button></div></div>
+                            <div class="set-item flex items-center justify-between"><div><input type="checkbox" id="d6e5s3" class="form-checkbox h-4 w-4 text-blue-600 rounded mr-2 set-checkbox"><label for="d6e5s3" class="text-sm">Set 3</label></div><div class="timer-controls flex items-center space-x-2"><span class="timer-display text-sm text-gray-500"></span><button onclick="startTimer(60, 'Hanging Knee Raises', this)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs timer-button">60s Rest</button></div></div>
+                        </div>
+                    </div>
+                 </div>
+            </div>
+
+        </div> <div class="mt-12 grid grid-cols-1 md:grid-cols-2 gap-6">
+             <div class="bg-white rounded-lg shadow-md p-6">
+                <h3 class="text-lg font-semibold text-gray-700 mb-3">Key Adjustments for Efficiency</h3>
+                <ul class="list-disc list-inside space-y-2 text-gray-600 text-sm">
+                    <li><span class="font-medium">Supersets:</span> Paired antagonistic muscle groups (e.g., chest + shoulders) to minimize downtime.</li>
+                    <li><span class="font-medium">Compound Focus:</span> Prioritized multi-joint lifts (e.g., presses, rows) over isolation work.</li>
+                    <li><span class="font-medium">Rest Intervals:</span> 90-120 seconds for compound lifts, 60 seconds for isolation exercises.</li>
+                    <li><span class="font-medium">Cardio Integration:</span> Added to rest days or post-workout (e.g., 10-min treadmill post-leg days).</li>
+                    <li><span class="font-medium">Redundancy Cut:</span> Removed duplicate exercises (e.g., only 1 forearm exercise per session).</li>
+                </ul>
+             </div>
+             <div class="bg-white rounded-lg shadow-md p-6">
+                <h3 class="text-lg font-semibold text-gray-700 mb-3">Pro Tips</h3>
+                 <ul class="list-disc list-inside space-y-2 text-gray-600 text-sm">
+                    <li><span class="font-medium">Warm-up:</span> 5-7 mins dynamic stretching + 2 warm-up sets per compound lift.</li>
+                    <li><span class="font-medium">Cool-down:</span> 5 mins static stretching (focus on worked muscles).</li>
+                    <li>Track rest times with a timer to stay disciplined.</li>
+                    <li>Rotate exercises every 4-6 weeks to avoid plateaus.</li>
+                </ul>
+             </div>
+        </div>
+
+        <div class="mt-12 text-center text-gray-500 text-sm">
+            <p>Track your progress and stay consistent! 💪</p>
+            <p>Remember to listen to your body and adjust as needed.</p>
+            <p class="mt-2 italic">Tip: For best results, open this file in a full web browser (like Safari or Chrome) on your device.</p>
+        </div>
+
+    </div> <script>
+        // --- Timer Logic ---
+        // ** IMPORTANT DEPENDENCY **
+        // This JavaScript controls the timers and saving checkbox progress.
+        // It requires a full web browser (like Safari, Chrome) to run correctly.
+        // Basic file viewers might disable or limit JavaScript.
+
+        let timerInterval = null; // Holds the interval ID for the timer
+        let endTime = 0; // Stores the timestamp when the timer should end
+        let currentTimerButton = null; // Stores the button that started the current timer
+
+        const timerSection = document.getElementById('timer-section');
+        const timerClock = document.getElementById('timer-clock');
+        const timerExercise = document.getElementById('timer-exercise');
+        const stopTimerBtn = document.getElementById('stop-timer-btn');
+        const allTimerDisplays = document.querySelectorAll('.timer-display');
+
+        // Function to format time remaining as MM:SS
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+        }
+
+        // Function to update the timer display
+        function updateTimer() {
+            const now = Date.now();
+            const secondsLeft = Math.round((endTime - now) / 1000);
+
+            // Update the main timer display (if visible)
+            if (timerSection.style.display !== 'hidden' && timerClock) {
+                 timerClock.textContent = formatTime(Math.max(0, secondsLeft));
+            }
+
+            // Update the small timer display next to the button
+            if (currentTimerButton) {
+                const displaySpan = currentTimerButton.previousElementSibling;
+                 if (displaySpan && displaySpan.classList.contains('timer-display')) {
+                     displaySpan.textContent = formatTime(Math.max(0, secondsLeft));
+                     displaySpan.classList.remove('text-gray-500'); // Make it visible
+                     displaySpan.classList.add('text-red-600', 'font-semibold'); // Highlight running timer
+                 }
+            }
+
+
+            if (secondsLeft <= 0) {
+                stopTimer(false); // Stop timer without hiding immediately if needed
+                // Optionally add a sound notification here (requires user interaction/permissions)
+                // console.log("Timer finished!");
+                // alert("Rest time is over!"); // Avoid using alert() - it's disruptive
+                 if (timerSection.style.display !== 'hidden' && timerClock) {
+                     timerClock.textContent = "Done!";
+                     timerClock.classList.add('text-green-600');
+                     timerClock.classList.remove('text-blue-600');
+                 }
+                 // Reset the small display
+                 if (currentTimerButton) {
+                    const displaySpan = currentTimerButton.previousElementSibling;
+                    if (displaySpan && displaySpan.classList.contains('timer-display')) {
+                        displaySpan.textContent = ''; // Clear display
+                        displaySpan.classList.remove('text-red-600', 'font-semibold');
+                        displaySpan.classList.add('text-gray-500');
+                    }
+                    currentTimerButton.disabled = false; // Re-enable button
+                    currentTimerButton = null; // Clear reference
+                 }
+                 // Optionally hide the main timer after a delay
+                 // setTimeout(hideTimerSection, 2000);
+            }
+        }
+
+        // Function to start the timer
+        function startTimer(durationSeconds, exerciseName, buttonElement) {
+            // Stop any existing timer
+            if (timerInterval) {
+                stopTimer(true); // Force stop and reset previous timer visuals
+            }
+
+            // Disable the clicked button to prevent multiple starts
+            buttonElement.disabled = true;
+            currentTimerButton = buttonElement; // Store the button
+
+            // Reset all other small timer displays
+            allTimerDisplays.forEach(span => {
+                if (span !== buttonElement.previousElementSibling) {
+                    span.textContent = '';
+                    span.classList.remove('text-red-600', 'font-semibold');
+                    span.classList.add('text-gray-500');
+                }
+            });
+             // Enable previously disabled buttons if they weren't the one just clicked
+            document.querySelectorAll('.timer-button:disabled').forEach(btn => {
+                if (btn !== buttonElement) {
+                    btn.disabled = false;
+                }
+            });
+
+
+            endTime = Date.now() + durationSeconds * 1000;
+            if (timerExercise) timerExercise.textContent = `Rest after: ${exerciseName}`;
+            if (timerClock) {
+                timerClock.classList.remove('text-green-600'); // Ensure it's not green from previous 'Done!'
+                timerClock.classList.add('text-blue-600');
+            }
+
+
+            // Show the main timer section
+            if (timerSection) timerSection.classList.remove('hidden');
+
+            // Initial update and start interval
+            updateTimer(); // Update immediately
+            timerInterval = setInterval(updateTimer, 1000); // Update every second
+        }
+
+        // Function to stop the timer
+        function stopTimer(forceResetVisuals = true) {
+            clearInterval(timerInterval);
+            timerInterval = null;
+
+            if (forceResetVisuals) {
+                 hideTimerSection();
+                 // Reset the small timer display associated with the stopped timer
+                 if (currentTimerButton) {
+                    const displaySpan = currentTimerButton.previousElementSibling;
+                    if (displaySpan && displaySpan.classList.contains('timer-display')) {
+                        displaySpan.textContent = ''; // Clear display
+                        displaySpan.classList.remove('text-red-600', 'font-semibold');
+                        displaySpan.classList.add('text-gray-500');
+                    }
+                    currentTimerButton.disabled = false; // Re-enable button
+                    currentTimerButton = null; // Clear reference
+                }
+            }
+        }
+
+        // Function to hide the main timer section
+        function hideTimerSection() {
+             if (timerSection) timerSection.classList.add('hidden');
+             if (timerClock) timerClock.textContent = "00:00"; // Reset clock display
+             if (timerExercise) timerExercise.textContent = "";
+        }
+
+        // Event listener for the stop button in the main timer section
+        if (stopTimerBtn) {
+            stopTimerBtn.addEventListener('click', () => stopTimer(true));
+        }
+
+
+        // --- Checkbox Persistence (using localStorage) ---
+        const checkboxes = document.querySelectorAll('.form-checkbox');
+
+        // Function to save checkbox states
+        function saveProgress() {
+            // Check if localStorage is available
+            if (typeof(Storage) !== "undefined") {
+                const progress = {};
+                checkboxes.forEach(checkbox => {
+                    if (checkbox.id) { // Only save checkboxes with IDs
+                        progress[checkbox.id] = checkbox.checked;
+                    }
+                });
+                localStorage.setItem('workoutProgress', JSON.stringify(progress));
+                // console.log("Progress saved.");
+            } else {
+                console.warn("LocalStorage is not supported in this browser/viewer. Progress will not be saved.");
+            }
+        }
+
+        // Function to load checkbox states
+        function loadProgress() {
+            // Check if localStorage is available
+             if (typeof(Storage) !== "undefined") {
+                const savedProgress = localStorage.getItem('workoutProgress');
+                if (savedProgress) {
+                    try {
+                        const progress = JSON.parse(savedProgress);
+                        checkboxes.forEach(checkbox => {
+                            if (checkbox.id && progress.hasOwnProperty(checkbox.id)) {
+                                checkbox.checked = progress[checkbox.id];
+                                // Trigger visual update for pre-checked boxes (strikethrough)
+                                const label = checkbox.nextElementSibling;
+                                if (label && label.tagName === 'LABEL') {
+                                    if (checkbox.checked) {
+                                        label.classList.add('line-through', 'text-gray-400');
+                                    } else {
+                                        label.classList.remove('line-through', 'text-gray-400');
+                                    }
+                                }
+                            }
+                        });
+                        // console.log("Progress loaded.");
+                    } catch (e) {
+                         console.error("Error parsing saved progress from localStorage:", e);
+                         localStorage.removeItem('workoutProgress'); // Clear corrupted data
+                    }
+                }
+            } else {
+                 console.warn("LocalStorage is not supported. Checkbox states cannot be loaded.");
+            }
+        }
+
+         // Add event listeners to checkboxes to save progress on change
+         // and update visual style (strikethrough)
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', (event) => {
+                 saveProgress();
+                 // Update label style on change
+                 const label = event.target.nextElementSibling;
+                 if (label && label.tagName === 'LABEL') {
+                     if (event.target.checked) {
+                         label.classList.add('line-through', 'text-gray-400');
+                     } else {
+                         label.classList.remove('line-through', 'text-gray-400');
+                     }
+                 }
+            });
+        });
+
+        // Load progress when the page loads
+        // Use DOMContentLoaded to ensure the HTML is parsed before running JS
+        document.addEventListener('DOMContentLoaded', loadProgress);
+
+    </script>
+
+</body>
+</html>
